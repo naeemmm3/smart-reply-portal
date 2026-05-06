@@ -1,70 +1,105 @@
-# Getting Started with Create React App
+# 🚀 Smart Reply Portal
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+AI-powered Smart Reply Portal with context-aware chat suggestions using:
 
-## Available Scripts
+- Node.js Backend
+- AWS EC2 Deployment
+- Google Gemini AI API
+- Netlify Frontend Hosting
+- Android APK Support
+- Cloudflare Tunnel
+- Smart AI Suggestions
 
-In the project directory, you can run:
+---
 
-### `npm start`
+# 📌 Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+✅ AI-generated smart replies  
+✅ Short / Friendly / Professional reply styles  
+✅ Chat history support  
+✅ Mobile responsive UI  
+✅ Android APK support  
+✅ Hosted frontend using Netlify  
+✅ Backend deployed on AWS EC2  
+✅ Gemini AI integration  
+✅ Works on mobile data and WiFi  
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+# 🛠 Tech Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Frontend
+- HTML
+- CSS
+- JavaScript
 
-### `npm run build`
+## Backend
+- Node.js
+- Express.js
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## AI
+- Google Gemini API
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Hosting
+- AWS EC2
+- Netlify
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+# ⚙️ Project Architecture
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Frontend (Netlify)
+↓
+Backend API (AWS EC2)
+↓
+Gemini AI
+↓
+Smart Reply Suggestions
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+# 📱 APK Support
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+The project also supports Android APK integration using WebView.
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+# 🚀 Deployment
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Backend Deployment
+- Hosted on AWS EC2
+- Node.js server running using PM2
 
-### Code Splitting
+## Frontend Deployment
+- Hosted on Netlify
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+---
 
-### Analyzing the Bundle Size
+# 🔐 Security
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- API keys stored securely on backend
+- No secrets exposed in frontend
 
-### Making a Progressive Web App
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+# 📸 Screenshots
 
-### Advanced Configuration
+(Add screenshots here later)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
+# 👨‍💻 Author
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Naeem Mulla
 
-### `npm run build` fails to minify
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+# ⭐ Future Improvements
+
+- Authentication system
+- Database integration
+- AI memory learning
+- Reinforcement learning
+- Real-time messaging
+- HTTPS custom domain
+- Production-grade deployment
