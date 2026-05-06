@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Smart Reply Pro</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  height: 100vh;
+  display: flex;
+  background: #0f172a;
+  color: white;
+}
+
+.sidebar {
+  width: 280px;
+  background: #020617;
+  padding: 16px;
+  border-right: 1px solid #1e293b;
+  display: flex;
+  flex-direction: column;
+}
+
+.brand {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 15px;
+}
+
+.new-chat {
+  padding: 13px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 14px;
+}
+
+.chat-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.chat-item {
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 9px;
+  background: #111827;
+  color: #e5e7eb;
+  cursor: pointer;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.chat-item:hover {
+  background: #1e293b;
+}
+
+.chat-item.active {
+  background: #2563eb;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #111827;
+}
+
+.header {
+  height: 58px;
+  padding: 0 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #020617;
+  border-bottom: 1px solid #1e293b;
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.status {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.chat-box {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: linear-gradient(135deg, #111827, #1e293b);
+}
+
+.message {
+  max-width: 72%;
+  padding: 13px 16px;
+  border-radius: 18px;
+  line-height: 1.5;
+  font-size: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.other {
+  align-self: flex-start;
+  background: #334155;
+  color: white;
+  border-bottom-left-radius: 4px;
+}
+
+.me {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.time {
+  font-size: 11px;
+  opacity: 0.65;
+  margin-top: 4px;
+}
+
+.empty {
+  margin: auto;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.bottom {
+  padding: 16px;
+  background: #020617;
+  border-top: 1px solid #1e293b;
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 150px 1fr 120px 130px;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+select,
+input,
+button {
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-size: 14px;
+}
+
+select,
+input {
+  background: #f8fafc;
+  color: #111827;
+}
+
+button {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.send-btn {
+  background: #2563eb;
+  color: white;
+}
+
+.ai-btn {
+  background: #10b981;
+  color: white;
+}
+
+.ai-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.info-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.info-card {
+  background: #111827;
+  border: 1px solid #334155;
+  color: #cbd5e1;
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 13px;
+}
+
+.suggestions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.suggestion-card {
+  background: #111827;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 14px;
+  min-height: 140px;
+  cursor: pointer;
+  transition: 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.suggestion-card:hover {
+  transform: translateY(-3px);
+  border-color: #60a5fa;
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+}
+
+.suggestion-title {
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.suggestion-desc {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 10px;
+}
+
+.suggestion-text {
+  color: #e5e7eb;
+  font-size: 14px;
+  line-height: 1.45;
+  flex: 1;
+}
+
+.use-btn {
+  margin-top: 12px;
+  padding: 9px;
+  border-radius: 10px;
+  background: #2563eb;
+  color: white;
+}
+
+.short-title { color: #60a5fa; }
+.friendly-title { color: #34d399; }
+.professional-title { color: #c084fc; }
+
+@media (max-width: 850px) {
+  body {
+    display: block;
+    height: auto;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .main {
+    min-height: 100vh;
+  }
+
+  .header {
+    height: 54px;
+    padding: 0 14px;
+  }
+
+  .chat-box {
+    padding: 14px;
+    min-height: 45vh;
+  }
+
+  .message {
+    max-width: 90%;
+    font-size: 14px;
+  }
+
+  .input-row {
+    grid-template-columns: 1fr;
+  }
+
+  .info-row,
+  .suggestions {
+    grid-template-columns: 1fr;
+  }
+
+  .bottom {
+    padding: 12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+  <div class="brand">Smart Reply Pro</div>
+  <button class="new-chat" onclick="createNewChat()">+ New Chat</button>
+  <div class="chat-list" id="chatList"></div>
+</aside>
+
+<main class="main">
+  <div class="header">
+    <div>
+      <div class="header-title">Messaging Portal</div>
+      <div class="status" id="statusBar">Ready</div>
+    </div>
+    <div class="status">Context-aware AI replies</div>
+  </div>
+
+  <div class="chat-box" id="chatBox">
+    <div class="empty">Create or open a chat to start testing smart replies.</div>
+  </div>
+
+  <div class="bottom">
+    <div class="input-row">
+      <select id="senderSelect">
+        <option value="other">Other Person</option>
+        <option value="me">Me</option>
+      </select>
+
+      <input id="messageInput" type="text" placeholder="Type a message..." autocomplete="off" />
+
+      <button class="send-btn" onclick="addMessage()">Add Message</button>
+      <button class="ai-btn" id="suggestBtn" onclick="suggestReply()">AI Suggest</button>
+    </div>
+
+    <div class="info-row">
+      <div class="info-card" id="toneProfileBox">
+        <strong>Tone Analysis:</strong> No analysis yet.
+      </div>
+      <div class="info-card" id="conversationInsightBox">
+        <strong>Latest Message:</strong> No message yet.
+      </div>
+    </div>
+
+    <div class="suggestions">
+      <div class="suggestion-card" onclick="useSuggestion('shortSuggestion')">
+        <div>
+          <div class="suggestion-title short-title">Short</div>
+          <div class="suggestion-desc">Quick and direct reply</div>
+          <div class="suggestion-text" id="shortSuggestion">No suggestion yet.</div>
+        </div>
+        <button class="use-btn" onclick="event.stopPropagation(); useSuggestion('shortSuggestion')">Use Short</button>
+      </div>
+
+      <div class="suggestion-card" onclick="useSuggestion('friendlySuggestion')">
+        <div>
+          <div class="suggestion-title friendly-title">Friendly</div>
+          <div class="suggestion-desc">Warm and casual reply</div>
+          <div class="suggestion-text" id="friendlySuggestion">No suggestion yet.</div>
+        </div>
+        <button class="use-btn" onclick="event.stopPropagation(); useSuggestion('friendlySuggestion')">Use Friendly</button>
+      </div>
+
+      <div class="suggestion-card" onclick="useSuggestion('professionalSuggestion')">
+        <div>
+          <div class="suggestion-title professional-title">Professional</div>
+          <div class="suggestion-desc">Formal workplace-safe reply</div>
+          <div class="suggestion-text" id="professionalSuggestion">No suggestion yet.</div>
+        </div>
+        <button class="use-btn" onclick="event.stopPropagation(); useSuggestion('professionalSuggestion')">Use Professional</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const API_BASE = "https://glasses-type-passenger-rainbow.trycloudflare.com";
+
+let currentSessionId = null;
+let allSessions = {};
+
+const chatBox = document.getElementById("chatBox");
+const chatList = document.getElementById("chatList");
+const messageInput = document.getElementById("messageInput");
+const senderSelect = document.getElementById("senderSelect");
+const statusBar = document.getElementById("statusBar");
+const suggestBtn = document.getElementById("suggestBtn");
+
+const shortEl = document.getElementById("shortSuggestion");
+const friendlyEl = document.getElementById("friendlySuggestion");
+const professionalEl = document.getElementById("professionalSuggestion");
+const toneBox = document.getElementById("toneProfileBox");
+const insightBox = document.getElementById("conversationInsightBox");
+
+messageInput.addEventListener("keydown", function (event) {
+  if (event.key === "Enter") addMessage();
+});
+
+function setStatus(text) {
+  statusBar.textContent = text;
+}
+
+function resetSuggestions() {
+  shortEl.textContent = "No suggestion yet.";
+  friendlyEl.textContent = "No suggestion yet.";
+  professionalEl.textContent = "No suggestion yet.";
+  toneBox.innerHTML = "<strong>Tone Analysis:</strong> No analysis yet.";
+  insightBox.innerHTML = "<strong>Latest Message:</strong> No message yet.";
+}
+
+function renderMessages(messages) {
+  chatBox.innerHTML = "";
+
+  if (!messages || messages.length === 0) {
+    chatBox.innerHTML = `<div class="empty">No messages yet. Start the conversation.</div>`;
+    return;
+  }
+
+  messages.forEach((msg) => {
+    const div = document.createElement("div");
+    div.className = `message ${msg.sender}`;
+    const time = msg.timestamp
+      ? new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      : new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+    div.innerHTML = `
+      <div>${msg.text}</div>
+      <div class="time">${time}</div>
+    `;
+    chatBox.appendChild(div);
+  });
+
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function buildSidebar() {
+  chatList.innerHTML = "";
+
+  const ids = Object.keys(allSessions).reverse();
+
+  ids.forEach((id) => {
+    const item = document.createElement("div");
+    item.className = "chat-item";
+
+    if (id === currentSessionId) item.classList.add("active");
+
+    item.textContent = allSessions[id].title || "New Chat";
+    item.onclick = () => openChat(id);
+
+    chatList.appendChild(item);
+  });
+}
+
+async function loadSessions() {
+  try {
+    const res = await fetch(`${API_BASE}/sessions`);
+
+    if (!res.ok) {
+      throw new Error("Server error");
+    }
+
+    allSessions = await res.json();
+    buildSidebar();
+    setStatus("Connected to backend ✅");
+  } catch (error) {
+    console.error("Load sessions error:", error);
+    setStatus("⚠️ Backend not reachable");
+  }
+}
+
+async function createNewChat() {
+  try {
+    const res = await fetch(`${API_BASE}/new-chat`, { method: "POST" });
+
+    if (!res.ok) {
+      throw new Error("Failed to create chat");
+    }
+
+    const data = await res.json();
+
+    currentSessionId = data.sessionId;
+    renderMessages([]);
+    resetSuggestions();
+    await loadSessions();
+    setStatus("New chat created");
+  } catch (error) {
+    console.error("Create chat error:", error);
+    setStatus("Failed to create chat");
+  }
+}
+
+function openChat(id) {
+  currentSessionId = id;
+  renderMessages(allSessions[id].messages || []);
+  resetSuggestions();
+  buildSidebar();
+  setStatus("Chat opened");
+}
+
+async function addMessage() {
+  try {
+    if (!currentSessionId) {
+      await createNewChat();
+    }
+
+    const text = messageInput.value.trim();
+    const sender = senderSelect.value;
+
+    if (!text) return;
+
+    const res = await fetch(`${API_BASE}/add-message`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId: currentSessionId, sender, text })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Failed to add message");
+    }
+
+    messageInput.value = "";
+    allSessions[currentSessionId] = data.chat;
+    renderMessages(data.chat.messages);
+    await loadSessions();
+
+    setStatus(sender === "me" ? "Message added as Me" : "Message added as Other Person");
+  } catch (error) {
+    console.error("Add message error:", error);
+    setStatus("Message failed");
+  }
+}
+
+async function suggestReply() {
+  if (!currentSessionId) {
+    setStatus("Create a chat first");
+    return;
+  }
+
+  suggestBtn.disabled = true;
+  shortEl.textContent = "Thinking...";
+  friendlyEl.textContent = "Thinking...";
+  professionalEl.textContent = "Thinking...";
+  setStatus("🤖 AI is thinking...");
+
+  try {
+    const res = await fetch(`${API_BASE}/suggest-reply`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId: currentSessionId })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Failed to generate reply");
+    }
+
+    shortEl.textContent = data.short || "No suggestion.";
+    friendlyEl.textContent = data.friendly || "No suggestion.";
+    professionalEl.textContent = data.professional || "No suggestion.";
+
+    toneBox.innerHTML = `
+      <strong>Tone Analysis:</strong><br>
+      Style: ${data.toneProfile?.style || "neutral"}<br>
+      Politeness: ${data.toneProfile?.politeness || "medium"}<br>
+      Length: ${data.toneProfile?.length || "short"}
+    `;
+
+    insightBox.innerHTML = `
+      <strong>Latest Message:</strong><br>
+      ${data.conversationInsight?.lastMessage || "No message found."}<br>
+      <strong>Intent:</strong> ${data.conversationInsight?.intent || "general"}<br>
+      <strong>Urgency:</strong> ${data.conversationInsight?.urgency || "low"}
+    `;
+
+    setStatus("✅ Smart replies ready");
+  } catch (error) {
+    console.error("Suggest reply error:", error);
+    shortEl.textContent = "Failed.";
+    friendlyEl.textContent = "Failed.";
+    professionalEl.textContent = "Failed.";
+    setStatus("❌ AI suggestion failed");
+  } finally {
+    suggestBtn.disabled = false;
+  }
+}
+
+function useSuggestion(id) {
+  const text = document.getElementById(id).textContent;
+
+  if (
+    text &&
+    text !== "No suggestion yet." &&
+    text !== "Thinking..." &&
+    text !== "Failed."
+  ) {
+    messageInput.value = text;
+    senderSelect.value = "me";
+    setStatus("Suggestion copied to input");
+  }
+}
+
+loadSessions();
+</script>
+
+</body>
+</html>

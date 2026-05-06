@@ -1,0 +1,10 @@
+node_modules/
+.env
+*.pem
+secret.txt
+sessions.json
+*.zip
+*.tar.gz
+*.apk
+build/
+dist/

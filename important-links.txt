@@ -1,0 +1,14 @@
+EC2 Backend:
+http://3.88.200.182:5000
+
+Netlify Frontend:
+https://fascinating-biscochitos-335a45.netlify.app
+
+Backend Tunnel:
+https://guided-comparative-cut-corps.trycloudflare.com  
+
+API Used:
+Gemini API: AIzaSyDc8UT-2LWoxRNmeSRocmjbYaSDVwsNE7A
+
+EC2 Login:
+ssh -i ~/Downloads/smartreply.pem ubuntu@3.88.200.182

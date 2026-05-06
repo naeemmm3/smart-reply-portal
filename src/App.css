@@ -1,0 +1,90 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #ece5dd;
+}
+
+.container {
+  max-width: 500px;
+  height: 100vh;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ccc;
+  background: white;
+}
+
+/* Header */
+.header {
+  background: #075e54;
+  color: white;
+  padding: 15px;
+  font-size: 18px;
+}
+
+/* Chat area */
+.chat-area {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+/* Messages */
+.message {
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 10px;
+  max-width: 70%;
+}
+
+.me {
+  background: #dcf8c6;
+  margin-left: auto;
+}
+
+.other {
+  background: #fff;
+  margin-right: auto;
+}
+
+/* Input */
+.input-area {
+  display: flex;
+  padding: 10px;
+  gap: 5px;
+  border-top: 1px solid #ccc;
+}
+
+input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+}
+
+/* Buttons */
+button {
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.send-btn {
+  background: #075e54;
+  color: white;
+}
+
+.ai-btn {
+  background: #25d366;
+  color: white;
+}
+
+/* Suggestion */
+.suggestion-box {
+  background: #fff3cd;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

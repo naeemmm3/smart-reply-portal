@@ -1,0 +1,81 @@
+Smart Reply Portal - Accuracy Test Results
+
+Test 1:
+Result:
+AI Short:
+AI Friendly:
+AI Professional:
+Pass or Fail:
+Notes: pass 
+
+Test 2:
+Result:
+AI Short:
+AI Friendly:
+AI Professional:
+Pass or Fail:
+Notes:
+
+Test 3:
+Result:
+AI Short:
+AI Friendly:
+AI Professional:
+Pass or Fail:
+Notes:
+
+Test 4:
+Result:
+AI Short:
+AI Friendly:
+AI Professional:
+Pass or Fail:
+Notes:
+
+Test 5:
+Result:
+AI Short:
+AI Friendly:
+AI Professional:
+Pass or Fail:
+Notes:
+
+Test 6:
+Result:
+AI Short:
+AI Friendly:
+AI Professional:
+Pass or Fail:
+Notes:
+
+Test 7:
+Result:
+AI Short:
+AI Friendly:
+AI Professional:
+Pass or Fail:
+Notes:
+
+Test 8:
+Result:
+AI Short:
+AI Friendly:
+AI Professional:
+Pass or Fail:
+Notes:
+
+Test 9:
+Result:
+AI Short:
+AI Friendly:
+AI Professional:
+Pass or Fail:
+Notes:
+
+Test 10:
+Result:
+AI Short:
+AI Friendly:
+AI Professional:
+Pass or Fail:
+Notes:

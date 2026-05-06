@@ -1,0 +1,217 @@
+Test 1
+Type: Professional / Urgent
+
+Other Person: Can you send me the updated report before 8 PM today?
+Me: Yes, I am working on it.
+Other Person: Please don’t delay, it’s urgent.
+
+Expected Short Reply:
+Sure, I’ll send it before 8 PM.
+
+Expected Friendly Reply:
+Sure, I’ll finish it and send it before 8 PM.
+
+Expected Professional Reply:
+Understood. I will send the updated report before 8 PM.
+
+What to check:
+- Understand urgency
+- Professional tone
+- Reply to latest message
+
+
+Test 2
+Type: Casual / Friendly
+
+Me: Heyy sure 😊
+Me: No problem 👍
+Other Person: Can you send the final file today?
+
+Expected Short Reply:
+Sure, I’ll send it today.
+
+Expected Friendly Reply:
+Hey, sure 😊 I’ll send it today.
+
+Expected Professional Reply:
+Yes, I will send the final file today.
+
+What to check:
+- Learn "Me" tone
+- Casual style
+- Emoji-friendly response
+
+
+Test 3
+Type: Support / Technical
+
+Other Person: The portal is not working on my system.
+Me: What error are you seeing?
+Other Person: It says failed to generate AI suggestions.
+
+Expected Short Reply:
+Please send me a screenshot.
+
+Expected Friendly Reply:
+Got it. Please send me a screenshot so I can check it.
+
+Expected Professional Reply:
+Understood. Please share the exact error screenshot so I can investigate.
+
+What to check:
+- Detect support issue
+- Ask useful follow-up
+- Stay relevant
+
+
+Test 4
+Type: Scheduling
+
+Other Person: Are you free this evening?
+Me: Yes, after 6 PM.
+Other Person: Great, can we meet around 7 then?
+
+Expected Short Reply:
+Yes, 7 works for me.
+
+Expected Friendly Reply:
+Yes, that works for me. See you at 7.
+
+Expected Professional Reply:
+Yes, 7 PM works for me. Please confirm the location.
+
+What to check:
+- Understand scheduling
+- Medium urgency
+- Clear confirmation
+
+
+Test 5
+Type: Gratitude
+
+Other Person: Thank you for helping me with the project.
+Me: You’re welcome.
+Other Person: I really appreciate your support.
+
+Expected Short Reply:
+Glad I could help.
+
+Expected Friendly Reply:
+You’re always welcome. Happy to help.
+
+Expected Professional Reply:
+You’re welcome. I’m glad I could support you.
+
+What to check:
+- Warm response
+- Not overly formal
+- Handle gratitude well
+
+
+Test 6
+Type: Formal Tone Learning
+
+Me: Certainly, I will review it.
+Me: Thank you for the update.
+Me: Please share the final version.
+Other Person: Can you confirm once the document is submitted?
+
+Expected Short Reply:
+Yes, I will confirm.
+
+Expected Friendly Reply:
+Sure, I’ll confirm once it’s submitted.
+
+Expected Professional Reply:
+Certainly. I will confirm once the document has been submitted.
+
+What to check:
+- Formal tone learning
+- High politeness
+- Professional consistency
+
+
+Test 7
+Type: Hidden Urgency
+
+Other Person: Are you done with the files?
+Me: Almost done.
+Other Person: Please don’t take too long, I need them before I leave.
+
+Expected Short Reply:
+I’ll send them shortly.
+
+Expected Friendly Reply:
+Sure, I’m finalizing them and will send them shortly.
+
+Expected Professional Reply:
+Understood. I will send the files shortly.
+
+What to check:
+- Detect urgency without the word "urgent"
+- Practical reply
+- No unrelated output
+
+
+Test 8
+Type: Manager Feedback
+
+Other Person: The UI looks better, but I am not convinced about the intelligence.
+Me: I improved the context handling and tone matching.
+Other Person: Then show me examples where it actually works better than before.
+
+Expected Short Reply:
+Sure, I’ll prepare strong examples.
+
+Expected Friendly Reply:
+Sure, I’ll prepare a few strong examples to show the improvement clearly.
+
+Expected Professional Reply:
+Understood. I will prepare clear examples demonstrating the improvement over the previous version.
+
+What to check:
+- Understand feedback
+- Structured response
+- Professional tone
+
+
+Test 9
+Type: Tone Trap
+
+Me: Certainly, I will review the report.
+Me: Thank you for your patience.
+Other Person: hey just send me the thing fast bro
+
+Expected Short Reply:
+I’ll send it shortly.
+
+Expected Friendly Reply:
+Sure, I’ll send it shortly.
+
+Expected Professional Reply:
+Certainly. I will send it shortly.
+
+What to check:
+- Follow "Me" tone, not "Other Person" tone
+- Avoid slang
+- Stay professional
+
+
+Test 10
+Type: Summary Request
+
+Other Person: Before we proceed, can you quickly summarize what has been completed, what is still pending, and what you plan to improve next?
+
+Expected Short Reply:
+Core features are done, some refinements are pending, and I’ll improve accuracy next.
+
+Expected Friendly Reply:
+I’ve completed the main features, a few refinements are pending, and I’ll focus on improving accuracy next.
+
+Expected Professional Reply:
+Core features are completed, some refinements are pending, and I will focus on improving accuracy in the next iteration.
+
+What to check:
+- Structured reply
+- Summarization ability
+- Clear and concise wording
