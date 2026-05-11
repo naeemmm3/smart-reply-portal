@@ -1,14 +1,11 @@
+require("dotenv").config();
+
 console.log("Backend starting...");
 
 const express = require("express");
 const cors = require("cors");
-const fs = require("fs");
-const path = require("path");
+const mongoose = require("mongoose");
 const { GoogleGenAI } = require("@google/genai");
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
 
 const app = express();
 const PORT = 5000;
@@ -16,22 +13,55 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 
-const FILE = path.join(__dirname, "sessions.json");
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
 
-let sessions = {};
+// MongoDB connection
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected ✅"))
+  .catch((err) => console.log("MongoDB Error:", err.message));
 
-if (fs.existsSync(FILE)) {
-  try {
-    sessions = JSON.parse(fs.readFileSync(FILE, "utf8"));
-  } catch {
-    sessions = {};
-  }
-}
+// MongoDB Schema
+const messageSchema = new mongoose.Schema({
+  sender: {
+    type: String,
+    enum: ["me", "other"],
+    required: true,
+  },
+  text: {
+    type: String,
+    required: true,
+  },
+  mode: {
+    type: String,
+    default: "normal",
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
-function saveSessions() {
-  fs.writeFileSync(FILE, JSON.stringify(sessions, null, 2));
-}
+const chatSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      default: "New Chat",
+    },
+    mode: {
+      type: String,
+      default: "normal",
+    },
+    messages: [messageSchema],
+  },
+  { timestamps: true }
+);
 
+const Chat = mongoose.model("Chat", chatSchema);
+
+// AI helper functions
 function buildToneProfile(messages) {
   const myMsgs = messages.filter((m) => m.sender === "me").slice(-8);
 
@@ -56,7 +86,8 @@ function buildToneProfile(messages) {
     ? "high"
     : "medium";
 
-  const avg = myMsgs.reduce((sum, msg) => sum + msg.text.length, 0) / myMsgs.length;
+  const avg =
+    myMsgs.reduce((sum, msg) => sum + msg.text.length, 0) / myMsgs.length;
 
   let length = "short";
   if (avg > 80) length = "long";
@@ -76,7 +107,7 @@ function getLastMessage(messages) {
 function detectIntent(text) {
   text = (text || "").toLowerCase();
 
-  if (/urgent|asap|immediately|right now|quickly|before|deadline|today|don't delay|dont delay/.test(text)) {
+  if (/urgent|asap|immediately|right now|quickly|before|deadline|today/.test(text)) {
     return "urgent_request";
   }
 
@@ -110,7 +141,7 @@ function detectIntent(text) {
 function detectUrgency(text) {
   text = (text || "").toLowerCase();
 
-  if (/urgent|asap|immediately|right now|before|deadline|don't delay|dont delay|today|quickly/.test(text)) {
+  if (/urgent|asap|immediately|right now|before|deadline|today|quickly/.test(text)) {
     return "high";
   }
 
@@ -133,27 +164,12 @@ function clean(text) {
     .slice(0, 140);
 }
 
-function extractJson(text) {
-  try {
-    return JSON.parse(text);
-  } catch {}
-
-  const match = text.match(/\{[\s\S]*\}/);
-  if (!match) return null;
-
-  try {
-    return JSON.parse(match[0]);
-  } catch {
-    return null;
-  }
-}
-
 function ruleBasedFallback(intent) {
   if (intent === "urgent_request") {
     return {
       short: "Sure, I’ll prioritize it.",
       friendly: "Sure, I’ll handle it quickly and update you.",
-      professional: "Understood. I will prioritize this and update you shortly."
+      professional: "Understood. I will prioritize this and update you shortly.",
     };
   }
 
@@ -161,7 +177,7 @@ function ruleBasedFallback(intent) {
     return {
       short: "Sure, I’ll send it.",
       friendly: "Sure, I’ll share it shortly.",
-      professional: "Understood. I will share it shortly."
+      professional: "Understood. I will share it shortly.",
     };
   }
 
@@ -169,7 +185,8 @@ function ruleBasedFallback(intent) {
     return {
       short: "Please send the screenshot.",
       friendly: "Got it. Please share a screenshot so I can check it.",
-      professional: "Understood. Please share the exact error message or screenshot so I can investigate."
+      professional:
+        "Understood. Please share the exact error message or screenshot so I can investigate.",
     };
   }
 
@@ -177,7 +194,7 @@ function ruleBasedFallback(intent) {
     return {
       short: "Glad I could help.",
       friendly: "You’re welcome, happy to help.",
-      professional: "You’re welcome. I’m glad I could support you."
+      professional: "You’re welcome. I’m glad I could support you.",
     };
   }
 
@@ -185,56 +202,53 @@ function ruleBasedFallback(intent) {
     return {
       short: "Yes, that works for me.",
       friendly: "Sure, that works for me.",
-      professional: "Yes, that time works for me. Please confirm the details."
-    };
-  }
-
-  if (intent === "confirmation") {
-    return {
-      short: "Okay, noted.",
-      friendly: "Sure, noted.",
-      professional: "Understood. Noted."
+      professional: "Yes, that time works for me. Please confirm the details.",
     };
   }
 
   return {
     short: "Okay, noted.",
     friendly: "Sure, I’ll take care of it.",
-    professional: "Understood. I will take care of it."
+    professional: "Understood. I will take care of it.",
   };
 }
 
 async function generateReplies(conversation, tone, lastMsg, intent, urgency, replyNeeded) {
-
   if (replyNeeded === "No") {
     return {
       short: "No reply needed.",
       friendly: "No reply needed for now.",
-      professional: "No response is required at this point."
+      professional: "No response is required at this point.",
     };
   }
 
   const prompt = `
 You are an AI assistant that generates smart replies for chat conversations.
 
-Your job is to generate the next reply that "Me" should send.
+Generate the next reply that "Me" should send.
 
-IMPORTANT RULES:
-- Reply ONLY to the latest incoming message
-- Do NOT explain anything
-- Keep replies short (1 sentence)
-- Make replies natural and human-like
-- Avoid robotic or repetitive responses
-- Adapt tone based on previous messages
+Rules:
+- Reply only to the latest incoming message.
+- Do not explain anything.
+- Keep replies short and natural.
+- Each reply must be one sentence.
+- Avoid robotic or repetitive replies.
+- Adapt tone based on previous "Me" messages.
+- Return valid JSON only.
 
 Conversation:
 ${conversation}
 
-Latest message:
+Latest incoming message:
 ${lastMsg}
 
 Intent: ${intent}
 Urgency: ${urgency}
+
+Tone:
+Style: ${tone.style}
+Politeness: ${tone.politeness}
+Length: ${tone.length}
 
 Return JSON:
 {
@@ -251,7 +265,6 @@ Return JSON:
     });
 
     const text = result.text || "";
-
     const match = text.match(/\{[\s\S]*\}/);
 
     if (!match) {
@@ -261,98 +274,159 @@ Return JSON:
     const parsed = JSON.parse(match[0]);
 
     return {
-      short: parsed.short || "",
-      friendly: parsed.friendly || "",
-      professional: parsed.professional || ""
+      short: clean(parsed.short) || ruleBasedFallback(intent).short,
+      friendly: clean(parsed.friendly) || ruleBasedFallback(intent).friendly,
+      professional:
+        clean(parsed.professional) || ruleBasedFallback(intent).professional,
     };
-
   } catch (error) {
     console.error("Gemini error:", error.message);
     return ruleBasedFallback(intent);
   }
 }
 
+// Routes
 app.get("/", (req, res) => {
-  res.send("Smart Reply Backend Running");
+  res.send("Smart Reply Backend Running with MongoDB ✅");
 });
 
 app.get("/health", (req, res) => {
   res.json({
     status: "ok",
     backend: "running",
-    model: "phi:latest",
-    time: new Date().toISOString()
+    database: mongoose.connection.readyState === 1 ? "connected" : "not connected",
+    ai: "gemini",
+    time: new Date().toISOString(),
   });
 });
 
-app.get("/sessions", (req, res) => {
-  res.json(sessions);
-});
-
-app.post("/new-chat", (req, res) => {
-  const id = Date.now().toString();
-
-  sessions[id] = {
-    title: "New Chat",
-    messages: []
-  };
-
-  saveSessions();
-
-  res.json({ sessionId: id });
-});
-
-app.post("/add-message", (req, res) => {
-  const { sessionId, sender, text } = req.body;
-
-  if (!sessionId || !sender || !text) {
-    return res.status(400).json({
-      error: "sessionId, sender and text are required"
-    });
-  }
-
-  if (!["me", "other"].includes(sender)) {
-    return res.status(400).json({
-      error: "sender must be either 'me' or 'other'"
-    });
-  }
-
-  if (!sessions[sessionId]) {
-    sessions[sessionId] = {
-      title: text.slice(0, 35),
-      messages: []
-    };
-  }
-
-  if (
-    sessions[sessionId].title === "New Chat" &&
-    sessions[sessionId].messages.length === 0
-  ) {
-    sessions[sessionId].title = text.slice(0, 35);
-  }
-
-  sessions[sessionId].messages.push({
-    sender,
-    text,
-    timestamp: new Date().toISOString()
-  });
-
-  saveSessions();
-
-  res.json({ chat: sessions[sessionId] });
-});
-
-app.post("/suggest-reply", async (req, res) => {
+// Get all chats
+app.get("/sessions", async (req, res) => {
   try {
-    const { sessionId } = req.body;
+    const chats = await Chat.find().sort({ updatedAt: -1 });
 
-    if (!sessionId || !sessions[sessionId]) {
+    const sessions = {};
+
+    chats.forEach((chat) => {
+      sessions[chat._id] = {
+        title: chat.title,
+        mode: chat.mode,
+        messages: chat.messages,
+      };
+    });
+
+    res.json(sessions);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to load chats" });
+  }
+});
+
+// Create new chat
+app.post("/new-chat", async (req, res) => {
+  try {
+    const chat = await Chat.create({
+      title: "New Chat",
+      mode: "normal",
+      messages: [],
+    });
+
+    res.json({ sessionId: chat._id });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create chat" });
+  }
+});
+
+// Add message
+app.post("/add-message", async (req, res) => {
+  try {
+    const { sessionId, sender, text, mode } = req.body;
+
+    if (!sessionId || !sender || !text) {
       return res.status(400).json({
-        error: "Valid sessionId is required"
+        error: "sessionId, sender and text are required",
       });
     }
 
-    const messages = sessions[sessionId].messages || [];
+    if (!["me", "other"].includes(sender)) {
+      return res.status(400).json({
+        error: "sender must be either 'me' or 'other'",
+      });
+    }
+
+    let chat = await Chat.findById(sessionId);
+
+    if (!chat) {
+      chat = await Chat.create({
+        title: text.slice(0, 35),
+        mode: mode || "normal",
+        messages: [],
+      });
+    }
+
+    if (chat.title === "New Chat" && chat.messages.length === 0) {
+      chat.title = text.slice(0, 35);
+    }
+
+    chat.mode = mode || chat.mode || "normal";
+
+    chat.messages.push({
+      sender,
+      text,
+      mode: mode || "normal",
+      timestamp: new Date(),
+    });
+
+    await chat.save();
+
+    res.json({
+      chat: {
+        title: chat.title,
+        mode: chat.mode,
+        messages: chat.messages,
+      },
+    });
+  } catch (error) {
+    console.error("Add message error:", error.message);
+    res.status(500).json({ error: "Failed to add message" });
+  }
+});
+
+// Suggest reply
+app.post("/suggest-reply", async (req, res) => {
+  try {
+    const { sessionId, mode } = req.body;
+
+    if (mode === "secure") {
+      return res.json({
+        short: "Secure Mode: AI disabled.",
+        friendly: "Messages are private in Secure Mode.",
+        professional:
+          "AI suggestions are unavailable while Secure Mode is enabled.",
+        toneProfile: buildToneProfile([]),
+        conversationInsight: {
+          lastMessage: "",
+          intent: "secure_mode",
+          urgency: "low",
+          replyNeeded: "No",
+        },
+      });
+    }
+
+    if (!sessionId) {
+      return res.status(400).json({
+        error: "Valid sessionId is required",
+      });
+    }
+
+    const chat = await Chat.findById(sessionId);
+
+    if (!chat) {
+      return res.status(404).json({
+        error: "Chat not found",
+      });
+    }
+
+    const messages = chat.messages || [];
 
     if (!messages.length) {
       return res.json({
@@ -364,8 +438,8 @@ app.post("/suggest-reply", async (req, res) => {
           lastMessage: "",
           intent: "none",
           urgency: "low",
-          replyNeeded: "No"
-        }
+          replyNeeded: "No",
+        },
       });
     }
 
@@ -398,13 +472,13 @@ app.post("/suggest-reply", async (req, res) => {
         lastMessage: lastMsg,
         intent,
         urgency,
-        replyNeeded
-      }
+        replyNeeded,
+      },
     });
   } catch (error) {
     console.error("Suggest reply error:", error.message);
     res.status(500).json({
-      error: "Failed to generate AI suggestions"
+      error: "Failed to generate AI suggestions",
     });
   }
 });

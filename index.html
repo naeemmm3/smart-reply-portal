@@ -147,7 +147,7 @@ body {
 
 .input-row {
   display: grid;
-  grid-template-columns: 150px 1fr 120px 130px;
+  grid-template-columns: 150px 170px 1fr 120px 130px;
   gap: 10px;
   margin-bottom: 14px;
 }
@@ -259,6 +259,11 @@ button {
 .friendly-title { color: #34d399; }
 .professional-title { color: #c084fc; }
 
+.secure-badge {
+  color: #facc15;
+  font-weight: 700;
+}
+
 @media (max-width: 850px) {
   body {
     display: block;
@@ -332,6 +337,11 @@ button {
         <option value="me">Me</option>
       </select>
 
+      <select id="modeSelect" onchange="handleModeChange()">
+        <option value="normal">Normal AI Mode</option>
+        <option value="secure">Secure Mode</option>
+      </select>
+
       <input id="messageInput" type="text" placeholder="Type a message..." autocomplete="off" />
 
       <button class="send-btn" onclick="addMessage()">Add Message</button>
@@ -379,7 +389,7 @@ button {
 </main>
 
 <script>
-const API_BASE = "https://glasses-type-passenger-rainbow.trycloudflare.com";
+const API_BASE = "https://app-else-tribal-isaac.trycloudflare.com";
 
 let currentSessionId = null;
 let allSessions = {};
@@ -388,6 +398,7 @@ const chatBox = document.getElementById("chatBox");
 const chatList = document.getElementById("chatList");
 const messageInput = document.getElementById("messageInput");
 const senderSelect = document.getElementById("senderSelect");
+const modeSelect = document.getElementById("modeSelect");
 const statusBar = document.getElementById("statusBar");
 const suggestBtn = document.getElementById("suggestBtn");
 
@@ -413,6 +424,22 @@ function resetSuggestions() {
   insightBox.innerHTML = "<strong>Latest Message:</strong> No message yet.";
 }
 
+function handleModeChange() {
+  if (modeSelect.value === "secure") {
+    suggestBtn.disabled = true;
+    setStatus("🔐 Secure Mode enabled: AI suggestions disabled.");
+    shortEl.textContent = "Secure Mode: AI disabled.";
+    friendlyEl.textContent = "Messages are private in Secure Mode.";
+    professionalEl.textContent = "AI suggestions are unavailable while Secure Mode is enabled.";
+    toneBox.innerHTML = "<strong>Secure Mode:</strong> Chat privacy mode is active.";
+    insightBox.innerHTML = "<strong>Privacy:</strong> AI cannot read private messages in Secure Mode.";
+  } else {
+    suggestBtn.disabled = false;
+    setStatus("Normal AI Mode enabled.");
+    resetSuggestions();
+  }
+}
+
 function renderMessages(messages) {
   chatBox.innerHTML = "";
 
@@ -424,14 +451,21 @@ function renderMessages(messages) {
   messages.forEach((msg) => {
     const div = document.createElement("div");
     div.className = `message ${msg.sender}`;
+
     const time = msg.timestamp
       ? new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       : new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
+    const secureText = msg.mode === "secure"
+      ? `<div class="secure-badge">🔐 Secure Message</div>`
+      : "";
+
     div.innerHTML = `
+      ${secureText}
       <div>${msg.text}</div>
       <div class="time">${time}</div>
     `;
+
     chatBox.appendChild(div);
   });
 
@@ -449,7 +483,8 @@ function buildSidebar() {
 
     if (id === currentSessionId) item.classList.add("active");
 
-    item.textContent = allSessions[id].title || "New Chat";
+    const modeLabel = allSessions[id].mode === "secure" ? "🔐 " : "";
+    item.textContent = modeLabel + (allSessions[id].title || "New Chat");
     item.onclick = () => openChat(id);
 
     chatList.appendChild(item);
@@ -487,6 +522,7 @@ async function createNewChat() {
     renderMessages([]);
     resetSuggestions();
     await loadSessions();
+    handleModeChange();
     setStatus("New chat created");
   } catch (error) {
     console.error("Create chat error:", error);
@@ -497,7 +533,15 @@ async function createNewChat() {
 function openChat(id) {
   currentSessionId = id;
   renderMessages(allSessions[id].messages || []);
+
+  if (allSessions[id].mode === "secure") {
+    modeSelect.value = "secure";
+  } else {
+    modeSelect.value = "normal";
+  }
+
   resetSuggestions();
+  handleModeChange();
   buildSidebar();
   setStatus("Chat opened");
 }
@@ -510,13 +554,19 @@ async function addMessage() {
 
     const text = messageInput.value.trim();
     const sender = senderSelect.value;
+    const mode = modeSelect.value;
 
     if (!text) return;
 
     const res = await fetch(`${API_BASE}/add-message`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionId: currentSessionId, sender, text })
+      body: JSON.stringify({
+        sessionId: currentSessionId,
+        sender,
+        text,
+        mode
+      })
     });
 
     const data = await res.json();
@@ -530,7 +580,11 @@ async function addMessage() {
     renderMessages(data.chat.messages);
     await loadSessions();
 
-    setStatus(sender === "me" ? "Message added as Me" : "Message added as Other Person");
+    if (mode === "secure") {
+      setStatus("🔐 Secure message added.");
+    } else {
+      setStatus(sender === "me" ? "Message added as Me" : "Message added as Other Person");
+    }
   } catch (error) {
     console.error("Add message error:", error);
     setStatus("Message failed");
@@ -538,6 +592,11 @@ async function addMessage() {
 }
 
 async function suggestReply() {
+  if (modeSelect.value === "secure") {
+    setStatus("🔐 Secure Mode is ON. AI cannot read private messages.");
+    return;
+  }
+
   if (!currentSessionId) {
     setStatus("Create a chat first");
     return;
@@ -553,7 +612,10 @@ async function suggestReply() {
     const res = await fetch(`${API_BASE}/suggest-reply`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionId: currentSessionId })
+      body: JSON.stringify({
+        sessionId: currentSessionId,
+        mode: modeSelect.value
+      })
     });
 
     const data = await res.json();
@@ -577,7 +639,8 @@ async function suggestReply() {
       <strong>Latest Message:</strong><br>
       ${data.conversationInsight?.lastMessage || "No message found."}<br>
       <strong>Intent:</strong> ${data.conversationInsight?.intent || "general"}<br>
-      <strong>Urgency:</strong> ${data.conversationInsight?.urgency || "low"}
+      <strong>Urgency:</strong> ${data.conversationInsight?.urgency || "low"}<br>
+      <strong>Reply Needed:</strong> ${data.conversationInsight?.replyNeeded || "No"}
     `;
 
     setStatus("✅ Smart replies ready");
@@ -588,7 +651,9 @@ async function suggestReply() {
     professionalEl.textContent = "Failed.";
     setStatus("❌ AI suggestion failed");
   } finally {
-    suggestBtn.disabled = false;
+    if (modeSelect.value !== "secure") {
+      suggestBtn.disabled = false;
+    }
   }
 }
 
@@ -599,7 +664,8 @@ function useSuggestion(id) {
     text &&
     text !== "No suggestion yet." &&
     text !== "Thinking..." &&
-    text !== "Failed."
+    text !== "Failed." &&
+    !text.includes("Secure Mode")
   ) {
     messageInput.value = text;
     senderSelect.value = "me";
