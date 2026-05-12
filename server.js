@@ -5,10 +5,23 @@ console.log("Backend starting...");
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const http = require("http");
+const { Server } = require("socket.io");
 const { GoogleGenAI } = require("@google/genai");
 
 const app = express();
 const PORT = 5000;
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
 
 app.use(cors());
 app.use(express.json());
@@ -17,13 +30,22 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-// MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected ✅"))
   .catch((err) => console.log("MongoDB Error:", err.message));
 
-// MongoDB Schema
+const userSchema = new mongoose.Schema(
+  {
+    name: String,
+    email: { type: String, unique: true },
+    password: String,
+  },
+  { timestamps: true }
+);
+
+const User = mongoose.model("User", userSchema);
+
 const messageSchema = new mongoose.Schema({
   sender: {
     type: String,
@@ -46,6 +68,11 @@ const messageSchema = new mongoose.Schema({
 
 const chatSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
+    },
     title: {
       type: String,
       default: "New Chat",
@@ -61,7 +88,42 @@ const chatSchema = new mongoose.Schema(
 
 const Chat = mongoose.model("Chat", chatSchema);
 
-// AI helper functions
+function createToken(user) {
+  return jwt.sign(
+    {
+      id: user._id,
+      email: user.email,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+}
+
+function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    req.user = null;
+    return next();
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  if (!token) {
+    req.user = null;
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+  } catch {
+    req.user = null;
+  }
+
+  next();
+}
+
 function buildToneProfile(messages) {
   const myMsgs = messages.filter((m) => m.sender === "me").slice(-8);
 
@@ -267,9 +329,7 @@ Return JSON:
     const text = result.text || "";
     const match = text.match(/\{[\s\S]*\}/);
 
-    if (!match) {
-      return ruleBasedFallback(intent);
-    }
+    if (!match) return ruleBasedFallback(intent);
 
     const parsed = JSON.parse(match[0]);
 
@@ -285,9 +345,29 @@ Return JSON:
   }
 }
 
-// Routes
+io.on("connection", (socket) => {
+  console.log("Socket connected:", socket.id);
+
+  socket.on("join-chat", (chatId) => {
+    if (chatId) {
+      socket.join(chatId);
+      console.log(`Socket ${socket.id} joined chat ${chatId}`);
+    }
+  });
+
+  socket.on("leave-chat", (chatId) => {
+    if (chatId) {
+      socket.leave(chatId);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected:", socket.id);
+  });
+});
+
 app.get("/", (req, res) => {
-  res.send("Smart Reply Backend Running with MongoDB ✅");
+  res.send("Smart Reply Backend Running with MongoDB + Auth + Realtime ✅");
 });
 
 app.get("/health", (req, res) => {
@@ -296,14 +376,115 @@ app.get("/health", (req, res) => {
     backend: "running",
     database: mongoose.connection.readyState === 1 ? "connected" : "not connected",
     ai: "gemini",
+    auth: "enabled",
+    realtime: "enabled",
     time: new Date().toISOString(),
   });
 });
 
-// Get all chats
+app.post("/signup", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        error: "name, email and password are required",
+      });
+    }
+
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({
+        error: "User already exists",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+    });
+
+    const token = createToken(user);
+
+    res.json({
+      message: "Signup successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    console.error("Signup error:", error.message);
+    res.status(500).json({ error: "Signup failed" });
+  }
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        error: "email and password are required",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({
+        error: "Invalid email or password",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        error: "Invalid email or password",
+      });
+    }
+
+    const token = createToken(user);
+
+    res.json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error.message);
+    res.status(500).json({ error: "Login failed" });
+  }
+});
+
+app.get("/profile", authMiddleware, async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const user = await User.findById(req.user.id).select("-password");
+
+  res.json({ user });
+});
+
+app.use(authMiddleware);
+
 app.get("/sessions", async (req, res) => {
   try {
-    const chats = await Chat.find().sort({ updatedAt: -1 });
+    const filter = req.user ? { userId: req.user.id } : { userId: null };
+
+    const chats = await Chat.find(filter).sort({ updatedAt: -1 });
 
     const sessions = {};
 
@@ -321,10 +502,10 @@ app.get("/sessions", async (req, res) => {
   }
 });
 
-// Create new chat
 app.post("/new-chat", async (req, res) => {
   try {
     const chat = await Chat.create({
+      userId: req.user ? req.user.id : null,
       title: "New Chat",
       mode: "normal",
       messages: [],
@@ -336,7 +517,6 @@ app.post("/new-chat", async (req, res) => {
   }
 });
 
-// Add message
 app.post("/add-message", async (req, res) => {
   try {
     const { sessionId, sender, text, mode } = req.body;
@@ -357,10 +537,15 @@ app.post("/add-message", async (req, res) => {
 
     if (!chat) {
       chat = await Chat.create({
+        userId: req.user ? req.user.id : null,
         title: text.slice(0, 35),
         mode: mode || "normal",
         messages: [],
       });
+    }
+
+    if (req.user && chat.userId && chat.userId.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Forbidden" });
     }
 
     if (chat.title === "New Chat" && chat.messages.length === 0) {
@@ -369,14 +554,28 @@ app.post("/add-message", async (req, res) => {
 
     chat.mode = mode || chat.mode || "normal";
 
-    chat.messages.push({
+    const newMessage = {
       sender,
       text,
       mode: mode || "normal",
       timestamp: new Date(),
-    });
+    };
+
+    chat.messages.push(newMessage);
 
     await chat.save();
+
+    const savedMessage = chat.messages[chat.messages.length - 1];
+
+    io.to(sessionId).emit("receive-message", {
+      sessionId,
+      message: savedMessage,
+      chat: {
+        title: chat.title,
+        mode: chat.mode,
+        messages: chat.messages,
+      },
+    });
 
     res.json({
       chat: {
@@ -391,7 +590,6 @@ app.post("/add-message", async (req, res) => {
   }
 });
 
-// Suggest reply
 app.post("/suggest-reply", async (req, res) => {
   try {
     const { sessionId, mode } = req.body;
@@ -423,6 +621,12 @@ app.post("/suggest-reply", async (req, res) => {
     if (!chat) {
       return res.status(404).json({
         error: "Chat not found",
+      });
+    }
+
+    if (req.user && chat.userId && chat.userId.toString() !== req.user.id) {
+      return res.status(403).json({
+        error: "Forbidden",
       });
     }
 
@@ -483,6 +687,6 @@ app.post("/suggest-reply", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -4,315 +4,74 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Smart Reply Pro</title>
-
 <style>
 * { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  font-family: "Segoe UI", Arial, sans-serif;
-  height: 100vh;
-  display: flex;
-  background: #0f172a;
-  color: white;
-}
-
-.sidebar {
-  width: 280px;
-  background: #020617;
-  padding: 16px;
-  border-right: 1px solid #1e293b;
-  display: flex;
-  flex-direction: column;
-}
-
-.brand {
-  font-size: 22px;
-  font-weight: 800;
-  margin-bottom: 15px;
-}
-
-.new-chat {
-  padding: 13px;
-  border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
-  margin-bottom: 14px;
-}
-
-.chat-list {
-  overflow-y: auto;
-  flex: 1;
-}
-
-.chat-item {
-  padding: 12px;
-  border-radius: 12px;
-  margin-bottom: 9px;
-  background: #111827;
-  color: #e5e7eb;
-  cursor: pointer;
-  font-size: 14px;
-  word-break: break-word;
-}
-
-.chat-item:hover {
-  background: #1e293b;
-}
-
-.chat-item.active {
-  background: #2563eb;
-}
-
-.main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  background: #111827;
-}
-
-.header {
-  height: 58px;
-  padding: 0 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #020617;
-  border-bottom: 1px solid #1e293b;
-}
-
-.header-title {
-  font-size: 18px;
-  font-weight: 800;
-}
-
-.status {
-  font-size: 13px;
-  color: #94a3b8;
-}
-
-.chat-box {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  background: linear-gradient(135deg, #111827, #1e293b);
-}
-
-.message {
-  max-width: 72%;
-  padding: 13px 16px;
-  border-radius: 18px;
-  line-height: 1.5;
-  font-size: 15px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-
-.other {
-  align-self: flex-start;
-  background: #334155;
-  color: white;
-  border-bottom-left-radius: 4px;
-}
-
-.me {
-  align-self: flex-end;
-  background: linear-gradient(135deg, #2563eb, #4f46e5);
-  color: white;
-  border-bottom-right-radius: 4px;
-}
-
-.time {
-  font-size: 11px;
-  opacity: 0.65;
-  margin-top: 4px;
-}
-
-.empty {
-  margin: auto;
-  color: #94a3b8;
-  text-align: center;
-}
-
-.bottom {
-  padding: 16px;
-  background: #020617;
-  border-top: 1px solid #1e293b;
-}
-
-.input-row {
-  display: grid;
-  grid-template-columns: 150px 170px 1fr 120px 130px;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-select,
-input,
-button {
-  padding: 12px;
-  border-radius: 12px;
-  border: none;
-  font-size: 14px;
-}
-
-select,
-input {
-  background: #f8fafc;
-  color: #111827;
-}
-
-button {
-  cursor: pointer;
-  font-weight: 700;
-}
-
-.send-btn {
-  background: #2563eb;
-  color: white;
-}
-
-.ai-btn {
-  background: #10b981;
-  color: white;
-}
-
-.ai-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.info-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.info-card {
-  background: #111827;
-  border: 1px solid #334155;
-  color: #cbd5e1;
-  border-radius: 14px;
-  padding: 12px;
-  font-size: 13px;
-}
-
-.suggestions {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-
-.suggestion-card {
-  background: #111827;
-  border: 1px solid #334155;
-  border-radius: 16px;
-  padding: 14px;
-  min-height: 140px;
-  cursor: pointer;
-  transition: 0.2s;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.suggestion-card:hover {
-  transform: translateY(-3px);
-  border-color: #60a5fa;
-  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
-}
-
-.suggestion-title {
-  font-size: 16px;
-  font-weight: 800;
-  margin-bottom: 4px;
-}
-
-.suggestion-desc {
-  font-size: 12px;
-  color: #94a3b8;
-  margin-bottom: 10px;
-}
-
-.suggestion-text {
-  color: #e5e7eb;
-  font-size: 14px;
-  line-height: 1.45;
-  flex: 1;
-}
-
-.use-btn {
-  margin-top: 12px;
-  padding: 9px;
-  border-radius: 10px;
-  background: #2563eb;
-  color: white;
-}
-
-.short-title { color: #60a5fa; }
-.friendly-title { color: #34d399; }
-.professional-title { color: #c084fc; }
-
-.secure-badge {
-  color: #facc15;
-  font-weight: 700;
-}
-
-@media (max-width: 850px) {
-  body {
-    display: block;
-    height: auto;
-  }
-
-  .sidebar {
-    display: none;
-  }
-
-  .main {
-    min-height: 100vh;
-  }
-
-  .header {
-    height: 54px;
-    padding: 0 14px;
-  }
-
-  .chat-box {
-    padding: 14px;
-    min-height: 45vh;
-  }
-
-  .message {
-    max-width: 90%;
-    font-size: 14px;
-  }
-
-  .input-row {
-    grid-template-columns: 1fr;
-  }
-
-  .info-row,
-  .suggestions {
-    grid-template-columns: 1fr;
-  }
-
-  .bottom {
-    padding: 12px;
-  }
+body { margin:0; font-family:"Segoe UI",Arial,sans-serif; height:100vh; display:flex; background:#0f172a; color:white; }
+.sidebar { width:280px; background:#020617; padding:16px; border-right:1px solid #1e293b; display:flex; flex-direction:column; }
+.brand { font-size:22px; font-weight:800; margin-bottom:15px; }
+.auth-box { background:#111827; border:1px solid #334155; border-radius:14px; padding:12px; margin-bottom:14px; }
+.auth-box input { width:100%; margin-bottom:8px; }
+.auth-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.auth-status { font-size:12px; color:#94a3b8; margin-top:8px; word-break:break-word; }
+.new-chat { padding:13px; border:none; border-radius:12px; background:linear-gradient(135deg,#2563eb,#7c3aed); color:white; font-weight:700; cursor:pointer; margin-bottom:14px; }
+.chat-list { overflow-y:auto; flex:1; }
+.chat-item { padding:12px; border-radius:12px; margin-bottom:9px; background:#111827; color:#e5e7eb; cursor:pointer; font-size:14px; word-break:break-word; }
+.chat-item:hover { background:#1e293b; }
+.chat-item.active { background:#2563eb; }
+.main { flex:1; display:flex; flex-direction:column; background:#111827; }
+.header { height:58px; padding:0 22px; display:flex; align-items:center; justify-content:space-between; background:#020617; border-bottom:1px solid #1e293b; }
+.header-title { font-size:18px; font-weight:800; }
+.status { font-size:13px; color:#94a3b8; }
+.chat-box { flex:1; padding:24px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; background:linear-gradient(135deg,#111827,#1e293b); }
+.message { max-width:72%; padding:13px 16px; border-radius:18px; line-height:1.5; font-size:15px; box-shadow:0 5px 15px rgba(0,0,0,.2); }
+.other { align-self:flex-start; background:#334155; color:white; border-bottom-left-radius:4px; }
+.me { align-self:flex-end; background:linear-gradient(135deg,#2563eb,#4f46e5); color:white; border-bottom-right-radius:4px; }
+.time { font-size:11px; opacity:.65; margin-top:4px; }
+.empty { margin:auto; color:#94a3b8; text-align:center; }
+.bottom { padding:16px; background:#020617; border-top:1px solid #1e293b; }
+.input-row { display:grid; grid-template-columns:150px 160px 1fr 120px 130px; gap:10px; margin-bottom:14px; }
+select,input,button { padding:12px; border-radius:12px; border:none; font-size:14px; }
+select,input { background:#f8fafc; color:#111827; }
+button { cursor:pointer; font-weight:700; }
+.send-btn { background:#2563eb; color:white; }
+.ai-btn { background:#10b981; color:white; }
+.logout-btn { background:#ef4444; color:white; width:100%; margin-top:8px; }
+.info-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+.info-card { background:#111827; border:1px solid #334155; color:#cbd5e1; border-radius:14px; padding:12px; font-size:13px; }
+.suggestions { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.suggestion-card { background:#111827; border:1px solid #334155; border-radius:16px; padding:14px; min-height:140px; cursor:pointer; transition:.2s; display:flex; flex-direction:column; justify-content:space-between; }
+.suggestion-card:hover { transform:translateY(-3px); border-color:#60a5fa; box-shadow:0 10px 25px rgba(37,99,235,.25); }
+.suggestion-title { font-size:16px; font-weight:800; margin-bottom:4px; }
+.suggestion-desc { font-size:12px; color:#94a3b8; margin-bottom:10px; }
+.suggestion-text { color:#e5e7eb; font-size:14px; line-height:1.45; flex:1; }
+.use-btn { margin-top:12px; padding:9px; border-radius:10px; background:#2563eb; color:white; }
+.short-title { color:#60a5fa; }
+.friendly-title { color:#34d399; }
+.professional-title { color:#c084fc; }
+.live-dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:#ef4444; margin-right:6px; }
+.live-dot.connected { background:#22c55e; }
+@media(max-width:850px){
+body{display:block;height:auto}.sidebar{display:block;width:100%;border-right:none}.main{min-height:100vh}.header{height:54px;padding:0 14px}.chat-box{padding:14px;min-height:45vh}.message{max-width:90%;font-size:14px}.input-row,.info-row,.suggestions{grid-template-columns:1fr}.bottom{padding:12px}
 }
 </style>
 </head>
-
 <body>
 
 <aside class="sidebar">
   <div class="brand">Smart Reply Pro</div>
+
+  <div class="auth-box">
+    <input id="nameInput" placeholder="Name for signup" />
+    <input id="emailInput" placeholder="Email" />
+    <input id="passwordInput" type="password" placeholder="Password" />
+    <div class="auth-actions">
+      <button class="send-btn" onclick="signup()">Signup</button>
+      <button class="ai-btn" onclick="login()">Login</button>
+    </div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+    <div class="auth-status" id="authStatus">Not logged in</div>
+  </div>
+
   <button class="new-chat" onclick="createNewChat()">+ New Chat</button>
   <div class="chat-list" id="chatList"></div>
 </aside>
@@ -323,11 +82,14 @@ button {
       <div class="header-title">Messaging Portal</div>
       <div class="status" id="statusBar">Ready</div>
     </div>
-    <div class="status">Context-aware AI replies</div>
+    <div class="status">
+      <span id="liveDot" class="live-dot"></span>
+      <span id="liveStatus">Realtime disconnected</span>
+    </div>
   </div>
 
   <div class="chat-box" id="chatBox">
-    <div class="empty">Create or open a chat to start testing smart replies.</div>
+    <div class="empty">Login or create a chat to start testing smart replies.</div>
   </div>
 
   <div class="bottom">
@@ -349,50 +111,37 @@ button {
     </div>
 
     <div class="info-row">
-      <div class="info-card" id="toneProfileBox">
-        <strong>Tone Analysis:</strong> No analysis yet.
-      </div>
-      <div class="info-card" id="conversationInsightBox">
-        <strong>Latest Message:</strong> No message yet.
-      </div>
+      <div class="info-card" id="toneProfileBox"><strong>Tone Analysis:</strong> No analysis yet.</div>
+      <div class="info-card" id="conversationInsightBox"><strong>Latest Message:</strong> No message yet.</div>
     </div>
 
     <div class="suggestions">
       <div class="suggestion-card" onclick="useSuggestion('shortSuggestion')">
-        <div>
-          <div class="suggestion-title short-title">Short</div>
-          <div class="suggestion-desc">Quick and direct reply</div>
-          <div class="suggestion-text" id="shortSuggestion">No suggestion yet.</div>
-        </div>
+        <div><div class="suggestion-title short-title">Short</div><div class="suggestion-desc">Quick and direct reply</div><div class="suggestion-text" id="shortSuggestion">No suggestion yet.</div></div>
         <button class="use-btn" onclick="event.stopPropagation(); useSuggestion('shortSuggestion')">Use Short</button>
       </div>
-
       <div class="suggestion-card" onclick="useSuggestion('friendlySuggestion')">
-        <div>
-          <div class="suggestion-title friendly-title">Friendly</div>
-          <div class="suggestion-desc">Warm and casual reply</div>
-          <div class="suggestion-text" id="friendlySuggestion">No suggestion yet.</div>
-        </div>
+        <div><div class="suggestion-title friendly-title">Friendly</div><div class="suggestion-desc">Warm and casual reply</div><div class="suggestion-text" id="friendlySuggestion">No suggestion yet.</div></div>
         <button class="use-btn" onclick="event.stopPropagation(); useSuggestion('friendlySuggestion')">Use Friendly</button>
       </div>
-
       <div class="suggestion-card" onclick="useSuggestion('professionalSuggestion')">
-        <div>
-          <div class="suggestion-title professional-title">Professional</div>
-          <div class="suggestion-desc">Formal workplace-safe reply</div>
-          <div class="suggestion-text" id="professionalSuggestion">No suggestion yet.</div>
-        </div>
+        <div><div class="suggestion-title professional-title">Professional</div><div class="suggestion-desc">Formal workplace-safe reply</div><div class="suggestion-text" id="professionalSuggestion">No suggestion yet.</div></div>
         <button class="use-btn" onclick="event.stopPropagation(); useSuggestion('professionalSuggestion')">Use Professional</button>
       </div>
     </div>
   </div>
 </main>
 
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
 <script>
-const API_BASE = "https://app-else-tribal-isaac.trycloudflare.com";
+const API_BASE = "https://bailey-house-grove-keith.trycloudflare.com";
 
 let currentSessionId = null;
 let allSessions = {};
+let token = localStorage.getItem("smart_reply_token") || "";
+let currentUser = JSON.parse(localStorage.getItem("smart_reply_user") || "null");
+let socket = null;
 
 const chatBox = document.getElementById("chatBox");
 const chatList = document.getElementById("chatList");
@@ -401,6 +150,9 @@ const senderSelect = document.getElementById("senderSelect");
 const modeSelect = document.getElementById("modeSelect");
 const statusBar = document.getElementById("statusBar");
 const suggestBtn = document.getElementById("suggestBtn");
+const authStatus = document.getElementById("authStatus");
+const liveStatus = document.getElementById("liveStatus");
+const liveDot = document.getElementById("liveDot");
 
 const shortEl = document.getElementById("shortSuggestion");
 const friendlyEl = document.getElementById("friendlySuggestion");
@@ -408,13 +160,47 @@ const professionalEl = document.getElementById("professionalSuggestion");
 const toneBox = document.getElementById("toneProfileBox");
 const insightBox = document.getElementById("conversationInsightBox");
 
-messageInput.addEventListener("keydown", function (event) {
-  if (event.key === "Enter") addMessage();
-});
+messageInput.addEventListener("keydown", e => { if (e.key === "Enter") addMessage(); });
 
-function setStatus(text) {
-  statusBar.textContent = text;
+function connectSocket() {
+  if (socket) return;
+
+  socket = io(API_BASE, {
+    transports: ["websocket", "polling"]
+  });
+
+  socket.on("connect", () => {
+    liveDot.classList.add("connected");
+    liveStatus.textContent = "Realtime connected";
+    if (currentSessionId) socket.emit("join-chat", currentSessionId);
+  });
+
+  socket.on("disconnect", () => {
+    liveDot.classList.remove("connected");
+    liveStatus.textContent = "Realtime disconnected";
+  });
+
+  socket.on("receive-message", async (data) => {
+    if (!data || data.sessionId !== currentSessionId) return;
+
+    allSessions[currentSessionId] = data.chat;
+    renderMessages(data.chat.messages);
+    buildSidebar();
+    setStatus("Live message received");
+  });
 }
+
+function authHeaders() {
+  const headers = { "Content-Type": "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
+
+function updateAuthStatus() {
+  authStatus.textContent = currentUser ? `Logged in as ${currentUser.name} (${currentUser.email})` : "Not logged in";
+}
+
+function setStatus(text) { statusBar.textContent = text; }
 
 function resetSuggestions() {
   shortEl.textContent = "No suggestion yet.";
@@ -431,8 +217,6 @@ function handleModeChange() {
     shortEl.textContent = "Secure Mode: AI disabled.";
     friendlyEl.textContent = "Messages are private in Secure Mode.";
     professionalEl.textContent = "AI suggestions are unavailable while Secure Mode is enabled.";
-    toneBox.innerHTML = "<strong>Secure Mode:</strong> Chat privacy mode is active.";
-    insightBox.innerHTML = "<strong>Privacy:</strong> AI cannot read private messages in Secure Mode.";
   } else {
     suggestBtn.disabled = false;
     setStatus("Normal AI Mode enabled.");
@@ -440,32 +224,95 @@ function handleModeChange() {
   }
 }
 
+async function signup() {
+  const name = document.getElementById("nameInput").value.trim();
+  const email = document.getElementById("emailInput").value.trim();
+  const password = document.getElementById("passwordInput").value.trim();
+
+  try {
+    const res = await fetch(`${API_BASE}/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Signup failed");
+
+    token = data.token;
+    currentUser = data.user;
+    localStorage.setItem("smart_reply_token", token);
+    localStorage.setItem("smart_reply_user", JSON.stringify(currentUser));
+    updateAuthStatus();
+    connectSocket();
+    await loadSessions();
+    setStatus("Signup successful ✅");
+  } catch (error) {
+    setStatus(error.message);
+  }
+}
+
+async function login() {
+  const email = document.getElementById("emailInput").value.trim();
+  const password = document.getElementById("passwordInput").value.trim();
+
+  try {
+    const res = await fetch(`${API_BASE}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Login failed");
+
+    token = data.token;
+    currentUser = data.user;
+    localStorage.setItem("smart_reply_token", token);
+    localStorage.setItem("smart_reply_user", JSON.stringify(currentUser));
+    updateAuthStatus();
+    connectSocket();
+    await loadSessions();
+    setStatus("Login successful ✅");
+  } catch (error) {
+    setStatus(error.message);
+  }
+}
+
+function logout() {
+  token = "";
+  currentUser = null;
+  currentSessionId = null;
+  allSessions = {};
+  localStorage.removeItem("smart_reply_token");
+  localStorage.removeItem("smart_reply_user");
+
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+
+  liveDot.classList.remove("connected");
+  liveStatus.textContent = "Realtime disconnected";
+  updateAuthStatus();
+  buildSidebar();
+  renderMessages([]);
+  resetSuggestions();
+  setStatus("Logged out");
+}
+
 function renderMessages(messages) {
   chatBox.innerHTML = "";
-
   if (!messages || messages.length === 0) {
     chatBox.innerHTML = `<div class="empty">No messages yet. Start the conversation.</div>`;
     return;
   }
 
-  messages.forEach((msg) => {
+  messages.forEach(msg => {
     const div = document.createElement("div");
     div.className = `message ${msg.sender}`;
-
-    const time = msg.timestamp
-      ? new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-      : new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-    const secureText = msg.mode === "secure"
-      ? `<div class="secure-badge">🔐 Secure Message</div>`
-      : "";
-
-    div.innerHTML = `
-      ${secureText}
-      <div>${msg.text}</div>
-      <div class="time">${time}</div>
-    `;
-
+    const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" }) : "";
+    div.innerHTML = `<div>${msg.text}</div><div class="time">${time}</div>`;
     chatBox.appendChild(div);
   });
 
@@ -474,120 +321,95 @@ function renderMessages(messages) {
 
 function buildSidebar() {
   chatList.innerHTML = "";
-
-  const ids = Object.keys(allSessions).reverse();
-
-  ids.forEach((id) => {
+  Object.keys(allSessions).reverse().forEach(id => {
     const item = document.createElement("div");
     item.className = "chat-item";
-
     if (id === currentSessionId) item.classList.add("active");
-
-    const modeLabel = allSessions[id].mode === "secure" ? "🔐 " : "";
-    item.textContent = modeLabel + (allSessions[id].title || "New Chat");
+    item.textContent = allSessions[id].title || "New Chat";
     item.onclick = () => openChat(id);
-
     chatList.appendChild(item);
   });
 }
 
 async function loadSessions() {
   try {
-    const res = await fetch(`${API_BASE}/sessions`);
-
-    if (!res.ok) {
-      throw new Error("Server error");
-    }
-
+    const res = await fetch(`${API_BASE}/sessions`, { headers: authHeaders() });
+    if (!res.ok) throw new Error("Backend not reachable");
     allSessions = await res.json();
     buildSidebar();
     setStatus("Connected to backend ✅");
   } catch (error) {
-    console.error("Load sessions error:", error);
     setStatus("⚠️ Backend not reachable");
   }
 }
 
 async function createNewChat() {
   try {
-    const res = await fetch(`${API_BASE}/new-chat`, { method: "POST" });
-
-    if (!res.ok) {
-      throw new Error("Failed to create chat");
-    }
+    const res = await fetch(`${API_BASE}/new-chat`, {
+      method: "POST",
+      headers: authHeaders()
+    });
 
     const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to create chat");
+
+    if (socket && currentSessionId) socket.emit("leave-chat", currentSessionId);
 
     currentSessionId = data.sessionId;
+
+    if (socket) socket.emit("join-chat", currentSessionId);
+
     renderMessages([]);
     resetSuggestions();
     await loadSessions();
-    handleModeChange();
     setStatus("New chat created");
   } catch (error) {
-    console.error("Create chat error:", error);
-    setStatus("Failed to create chat");
+    setStatus(error.message);
   }
 }
 
 function openChat(id) {
+  if (socket && currentSessionId) socket.emit("leave-chat", currentSessionId);
+
   currentSessionId = id;
+
+  if (socket) socket.emit("join-chat", currentSessionId);
+
   renderMessages(allSessions[id].messages || []);
-
-  if (allSessions[id].mode === "secure") {
-    modeSelect.value = "secure";
-  } else {
-    modeSelect.value = "normal";
-  }
-
   resetSuggestions();
-  handleModeChange();
   buildSidebar();
   setStatus("Chat opened");
 }
 
 async function addMessage() {
   try {
-    if (!currentSessionId) {
-      await createNewChat();
-    }
+    if (!currentSessionId) await createNewChat();
 
     const text = messageInput.value.trim();
     const sender = senderSelect.value;
-    const mode = modeSelect.value;
-
     if (!text) return;
 
     const res = await fetch(`${API_BASE}/add-message`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders(),
       body: JSON.stringify({
         sessionId: currentSessionId,
         sender,
         text,
-        mode
+        mode: modeSelect.value
       })
     });
 
     const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || "Failed to add message");
-    }
+    if (!res.ok) throw new Error(data.error || "Message failed");
 
     messageInput.value = "";
     allSessions[currentSessionId] = data.chat;
     renderMessages(data.chat.messages);
     await loadSessions();
-
-    if (mode === "secure") {
-      setStatus("🔐 Secure message added.");
-    } else {
-      setStatus(sender === "me" ? "Message added as Me" : "Message added as Other Person");
-    }
+    setStatus(sender === "me" ? "Message added as Me" : "Message added as Other Person");
   } catch (error) {
-    console.error("Add message error:", error);
-    setStatus("Message failed");
+    setStatus(error.message);
   }
 }
 
@@ -611,7 +433,7 @@ async function suggestReply() {
   try {
     const res = await fetch(`${API_BASE}/suggest-reply`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders(),
       body: JSON.stringify({
         sessionId: currentSessionId,
         mode: modeSelect.value
@@ -619,10 +441,7 @@ async function suggestReply() {
     });
 
     const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || "Failed to generate reply");
-    }
+    if (!res.ok) throw new Error(data.error || "AI failed");
 
     shortEl.textContent = data.short || "No suggestion.";
     friendlyEl.textContent = data.friendly || "No suggestion.";
@@ -639,42 +458,32 @@ async function suggestReply() {
       <strong>Latest Message:</strong><br>
       ${data.conversationInsight?.lastMessage || "No message found."}<br>
       <strong>Intent:</strong> ${data.conversationInsight?.intent || "general"}<br>
-      <strong>Urgency:</strong> ${data.conversationInsight?.urgency || "low"}<br>
-      <strong>Reply Needed:</strong> ${data.conversationInsight?.replyNeeded || "No"}
+      <strong>Urgency:</strong> ${data.conversationInsight?.urgency || "low"}
     `;
 
     setStatus("✅ Smart replies ready");
   } catch (error) {
-    console.error("Suggest reply error:", error);
     shortEl.textContent = "Failed.";
     friendlyEl.textContent = "Failed.";
     professionalEl.textContent = "Failed.";
-    setStatus("❌ AI suggestion failed");
+    setStatus(error.message);
   } finally {
-    if (modeSelect.value !== "secure") {
-      suggestBtn.disabled = false;
-    }
+    suggestBtn.disabled = false;
   }
 }
 
 function useSuggestion(id) {
   const text = document.getElementById(id).textContent;
-
-  if (
-    text &&
-    text !== "No suggestion yet." &&
-    text !== "Thinking..." &&
-    text !== "Failed." &&
-    !text.includes("Secure Mode")
-  ) {
+  if (text && !text.includes("No suggestion") && text !== "Thinking..." && text !== "Failed.") {
     messageInput.value = text;
     senderSelect.value = "me";
     setStatus("Suggestion copied to input");
   }
 }
 
+updateAuthStatus();
+connectSocket();
 loadSessions();
 </script>
-
 </body>
 </html>
