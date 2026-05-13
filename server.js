@@ -19,7 +19,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST", "DELETE"]
   }
 });
 
@@ -88,6 +88,22 @@ const chatSchema = new mongoose.Schema(
 
 const Chat = mongoose.model("Chat", chatSchema);
 
+const memorySchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
+    },
+    style: String,
+    replyText: String,
+    context: String,
+  },
+  { timestamps: true }
+);
+
+const Memory = mongoose.model("Memory", memorySchema);
+
 function createToken(user) {
   return jwt.sign(
     {
@@ -115,8 +131,7 @@ function authMiddleware(req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
   } catch {
     req.user = null;
   }
@@ -275,7 +290,15 @@ function ruleBasedFallback(intent) {
   };
 }
 
-async function generateReplies(conversation, tone, lastMsg, intent, urgency, replyNeeded) {
+async function generateReplies(
+  conversation,
+  tone,
+  lastMsg,
+  intent,
+  urgency,
+  replyNeeded,
+  memoryText
+) {
   if (replyNeeded === "No") {
     return {
       short: "No reply needed.",
@@ -296,7 +319,16 @@ Rules:
 - Each reply must be one sentence.
 - Avoid robotic or repetitive replies.
 - Adapt tone based on previous "Me" messages.
+- Use user memory to match preferred reply style.
 - Return valid JSON only.
+
+Tone:
+Style: ${tone.style}
+Politeness: ${tone.politeness}
+Length: ${tone.length}
+
+User memory from previously accepted replies:
+${memoryText || "No saved preference yet."}
 
 Conversation:
 ${conversation}
@@ -306,11 +338,6 @@ ${lastMsg}
 
 Intent: ${intent}
 Urgency: ${urgency}
-
-Tone:
-Style: ${tone.style}
-Politeness: ${tone.politeness}
-Length: ${tone.length}
 
 Return JSON:
 {
@@ -367,7 +394,7 @@ io.on("connection", (socket) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Smart Reply Backend Running with MongoDB + Auth + Realtime ✅");
+  res.send("Smart Reply Backend Running with AI Memory ✅");
 });
 
 app.get("/health", (req, res) => {
@@ -378,6 +405,7 @@ app.get("/health", (req, res) => {
     ai: "gemini",
     auth: "enabled",
     realtime: "enabled",
+    memory: "enabled",
     time: new Date().toISOString(),
   });
 });
@@ -479,6 +507,30 @@ app.get("/profile", authMiddleware, async (req, res) => {
 });
 
 app.use(authMiddleware);
+
+app.post("/memory/accepted-reply", async (req, res) => {
+  try {
+    const { style, replyText, context } = req.body;
+
+    if (!replyText || !style) {
+      return res.status(400).json({
+        error: "style and replyText are required",
+      });
+    }
+
+    await Memory.create({
+      userId: req.user ? req.user.id : null,
+      style,
+      replyText,
+      context: context || "",
+    });
+
+    res.json({ message: "AI memory saved successfully" });
+  } catch (error) {
+    console.error("Memory save error:", error.message);
+    res.status(500).json({ error: "Failed to save AI memory" });
+  }
+});
 
 app.get("/sessions", async (req, res) => {
   try {
@@ -590,6 +642,29 @@ app.post("/add-message", async (req, res) => {
   }
 });
 
+app.delete("/sessions/:id", async (req, res) => {
+  try {
+    const chatId = req.params.id;
+
+    const chat = await Chat.findById(chatId);
+
+    if (!chat) {
+      return res.status(404).json({ error: "Chat not found" });
+    }
+
+    if (req.user && chat.userId && chat.userId.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    await Chat.findByIdAndDelete(chatId);
+
+    res.json({ message: "Chat deleted successfully" });
+  } catch (error) {
+    console.error("Delete chat error:", error.message);
+    res.status(500).json({ error: "Failed to delete chat" });
+  }
+});
+
 app.post("/suggest-reply", async (req, res) => {
   try {
     const { sessionId, mode } = req.body;
@@ -660,13 +735,26 @@ app.post("/suggest-reply", async (req, res) => {
       .map((m) => `${m.sender === "other" ? "Other Person" : "Me"}: ${m.text}`)
       .join("\n");
 
+    const memories = await Memory.find({
+      userId: req.user ? req.user.id : null,
+    })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    const memoryText = memories.length
+      ? memories
+          .map((m) => `Preferred ${m.style} reply: ${m.replyText}`)
+          .join("\n")
+      : "No saved preference yet.";
+
     const replies = await generateReplies(
       conversation,
       tone,
       lastMsg,
       intent,
       urgency,
-      replyNeeded
+      replyNeeded,
+      memoryText
     );
 
     res.json({
@@ -678,6 +766,7 @@ app.post("/suggest-reply", async (req, res) => {
         urgency,
         replyNeeded,
       },
+      memoryUsed: memoryText,
     });
   } catch (error) {
     console.error("Suggest reply error:", error.message);

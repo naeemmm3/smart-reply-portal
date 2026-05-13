@@ -135,7 +135,36 @@ body{display:block;height:auto}.sidebar{display:block;width:100%;border-right:no
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
 <script>
-const API_BASE = "https://bailey-house-grove-keith.trycloudflare.com";
+async function deleteChat(id) {
+  const confirmDelete = confirm("Delete this chat?");
+  if (!confirmDelete) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/sessions/${id}`, {
+      method: "DELETE",
+      headers: authHeaders()
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Failed to delete chat");
+    }
+
+    if (currentSessionId === id) {
+      currentSessionId = null;
+      renderMessages([]);
+      resetSuggestions();
+    }
+
+    delete allSessions[id];
+    buildSidebar();
+    setStatus("Chat deleted successfully");
+  } catch (error) {
+    setStatus(error.message);
+  }
+}
+const API_BASE = "https://consistency-payday-insider-majority.trycloudflare.com";
 
 let currentSessionId = null;
 let allSessions = {};
@@ -325,8 +354,13 @@ function buildSidebar() {
     const item = document.createElement("div");
     item.className = "chat-item";
     if (id === currentSessionId) item.classList.add("active");
-    item.textContent = allSessions[id].title || "New Chat";
-    item.onclick = () => openChat(id);
+    item.innerHTML = `
+  <span>${allSessions[id].title || "New Chat"}</span>
+  <button style="float:right;background:#ef4444;color:white;border:none;border-radius:6px;padding:2px 6px;cursor:pointer;"
+    onclick="event.stopPropagation(); deleteChat('${id}')">×</button>
+`;
+
+item.onclick = () => openChat(id);
     chatList.appendChild(item);
   });
 }
@@ -472,12 +506,40 @@ async function suggestReply() {
   }
 }
 
-function useSuggestion(id) {
+async function useSuggestion(id) {
   const text = document.getElementById(id).textContent;
-  if (text && !text.includes("No suggestion") && text !== "Thinking..." && text !== "Failed.") {
+
+  if (
+    text &&
+    !text.includes("No suggestion") &&
+    text !== "Thinking..." &&
+    text !== "Failed."
+  ) {
     messageInput.value = text;
     senderSelect.value = "me";
     setStatus("Suggestion copied to input");
+
+    let style = "unknown";
+
+    if (id === "shortSuggestion") style = "short";
+    if (id === "friendlySuggestion") style = "friendly";
+    if (id === "professionalSuggestion") style = "professional";
+
+    try {
+      await fetch(`${API_BASE}/memory/accepted-reply`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({
+          style,
+          replyText: text,
+          context: currentSessionId || ""
+        })
+      });
+
+      setStatus(`AI memory updated: prefers ${style} replies`);
+    } catch (error) {
+      console.error("Memory save failed:", error);
+    }
   }
 }
 
